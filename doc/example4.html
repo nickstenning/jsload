@@ -1,0 +1,271 @@
+<html>
+  <head>
+    <title>JSLoad Examples: Example 4</title>
+    <link rel="stylesheet" type="text/css" href="../shared/style.css">
+    <script src="../jsload.js"></script>  
+
+    <script type="text/Javascript">
+      // Model dependencies
+      var tags = [
+        //{ name : "http://mindtangle.net/wp-content/crossdomainscripttest.js" },
+        { name : "http://www.flickr.com/badge_code_v2.gne?show_name=1&count=8&display=latest&size=s&layout=x&source=user&user=72517401%40N00" },
+        { name : "cds",
+          tagOnly : true,
+          requires : ["http://www.flickr.com/badge_code_v2.gne?show_name=1&count=8&display=latest&size=s&layout=x&source=user&user=72517401%40N00"]
+        },        
+        { name : "prototype" },
+        { name : "Base",
+          requires : ["prototype"]
+        },
+        { name : "cvi_busy_lib" },
+        { name : "timer",
+          requires : ["prototype", "cvi_busy_lib"],
+          tagOnly: true
+        },
+        { name : "blink",
+          requires : ["Base"],
+        },
+        { name : "flasher",
+          requires : ["blink"],
+          tagOnly: true
+        }        
+      ];    
+      var jsLoader = new JSLoad(tags, "./"); 
+    </script>
+    
+  </head>
+  <body>
+    <div class="title">
+      <img src="../shared/icon.png" align="top" />JSLoad
+    </div>
+    <div id="content">
+      <h1>        
+        <a href="index.html">Doc</a> : 
+        Examples
+      </h1>
+      
+      <h2>Example 3: Duplicating Widgets and Refactoring</h2>
+      
+      <p>
+        This example includes the same dependencies as in 
+        <a href="example2.html">Example 2</a>.
+      </p>
+    
+      <div id="output" class="graybox">Run stuff!</div>
+    
+      <script type="text/javascript" charset="utf-8">
+        function log(text) {
+          var logger = document.getElementById("logger");
+          logger.style.display = "inherit";
+          logger.innerHTML += text + "<br/>"
+        }
+        
+        function runCrossDomainDocWrite() {
+          var filesThatWillBeLoaded = jsLoader.getSrcToLoad(["flasher", "cds"]);
+          log( "Files that will be loaded: " 
+            + (filesThatWillBeLoaded.length > 0 ? filesThatWillBeLoaded.join(", ") : "none") );
+          jsLoader.load( ["flasher", "cds"], function() {
+            $("output").innerHTML = "Flashing!";
+            new RedBlinker( {"element":$("output")} ).blink();
+            flushWikiaWriter("1");
+          });
+        }
+      </script>
+      
+      <input type="button" onclick="runCrossDomainDocWrite()" value="Run Cross-Domain Document.write()" />
+    
+      <div id="logger" class="graybox hidden"></div>
+    
+      <p class="footer">
+      &copy; 2007-2008 Instructables | Licenses:
+        <a href="http://opensource.org/licenses/lgpl-2.1.php" rel="license">LGPL (source code)</a> 
+        and 
+        <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="license">
+          <abbr title="Creative Commons Attribution-Share Alike 3.0 License">CC BY-SA</abbr> (documentation)
+        </a>.
+      </p>
+      
+    </div>
+    
+    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+    _uacct = "UA-587715-2";
+    urchinTracker();
+    </script>
+    
+    
+    
+    <div id="adSpace1">asdf</div>
+    
+    
+    <script type="text/javascript">
+    
+    /* 
+      trace out the wikia code
+            
+      enableWikiaWriter - overwrites document.write and document.writeln, 
+        setting them to writeFake and writelnFake.
+      writeFake and writeLnFake - toggle writeLine between them and then start
+        up writeProcess.
+      writeProcess - take in the document.write input, process, and store in
+        the buffer. writeProcess keeps track of whether the output is within
+        script vs iframe tags. contents or iframes are written out to the buffer.
+        contents not in iframes are written out using native document.write 
+        functions.
+      flushWikiaWriter - does the real document.write, after the fact, pumping the 
+        buffer out to an element's innerHTML. Then calls disableWikiaWriter.
+      disableWikiaWriter - resets document.write and document.writeln to defaults
+    
+      permutations to test:
+       - within iframe vs. script vs. none
+       - various nesting orders of the above
+       - before and after page load
+       - browsers
+    */ 
+    
+    var writeLine;
+    var inScript = false;
+    var inIframe = false;
+    var writeBuffer = '';
+    function writeFake(s) {
+    	writeLine = false;
+    	writeProcess(s);
+
+    }
+    function writelnFake(s) {
+    	writeLine = true;
+    	writeProcess(s);
+    }
+    function writeProcess(content) {
+    	while(content != '') {
+    		var contentLower = content.toLowerCase();
+    		var openIndex = contentLower.indexOf('<script');
+    		var closeIndex = contentLower.indexOf('</script');
+
+    		var openIframeIndex = contentLower.indexOf('<iframe');
+    		var closeIframeIndex = contentLower.indexOf('</iframe');
+
+    		if(!inScript && openIframeIndex > -1) {
+    			if(openIframeIndex > 0) {
+    				realWrite(content.substring(0,openIframeIndex));
+    			}
+    			inIframe = true;
+    			if(closeIframeIndex > -1) {
+    				inIframe = false;
+    				realAppend(content.substring(openIframeIndex, closeIframeIndex+9));
+    				content = content.substring(closeIframeIndex+9);
+    			} else {
+    				realAppend(content.substring(openIframeIndex, content.length));
+    				content = '';
+    			}
+    		} else if(!inScript && closeIframeIndex > -1) {
+    			inIframe = false;
+    			realAppend(content.substring(0,closeIframeIndex+9));
+    			content = content.substring(closeIframeIndex+9, content.length);
+    		} else if(openIndex > -1) {
+    			if(openIndex > 0) {
+    				if(inScript) {
+    					realWrite(content.substring(0,openIndex));
+    				} else {
+    					realAppend(content.substring(0,openIndex));
+    				}
+    			}
+    			inScript = true;
+    			if(closeIndex > -1) {
+    				inScript = false;
+    				realWrite(content.substring(openIndex, closeIndex+9));
+    				content = content.substring(closeIndex+9);
+    			} else {
+    				realWrite(content.substring(openIndex, content.length));
+    				content = '';
+    			}
+    		} else if(closeIndex > -1) {
+    			inScript = false;
+    			realWrite(content.substring(0,closeIndex+9));
+    			content = content.substring(closeIndex+9, content.length);
+    		} else {
+    			if(inScript) {
+    				realWrite(content);
+    			} else {
+    				realAppend(content);
+    			}
+    			content = '';
+    		}
+    	}
+    }
+    function realWrite(s) {
+    	if(inIframe) {
+    		if(writeLine) {
+    			realAppend(s + "\n");
+    		} else {
+    			realAppend(s);
+    		}
+    		return;
+    	}
+
+    	//YAHOO.log("write: " + s);
+    	if(writeLine) {
+    		document.writelnOrg(s);
+    	} else {
+    		document.writeOrg(s);
+    	}
+    }
+    function realAppend(s) {
+    	//YAHOO.log("append: " + s);
+    	writeBuffer += s;
+    }
+    function enableWikiaWriter() {
+    	document.writeOrg = document.write;
+    	document.writelnOrg = document.writeln;
+    	document.write = writeFake;
+    	document.writeln = writelnFake;
+    }
+    function disableWikiaWriter() {
+    	document.write = document.writeOrg;
+    	document.writeln = document.writelnOrg;
+    }
+    function flushWikiaWriter(spaceId) {
+    	document.getElementById('adSpace'+spaceId).innerHTML = writeBuffer;
+    	writeBuffer = '';
+    	disableWikiaWriter();
+    }
+    </script>
+    
+    <script type="text/javascript">
+    console.log(document.write);
+    enableWikiaWriter();
+    console.log(document.write);
+    
+    <!--//<![CDATA[
+    //if(document.getElementById('adSpace1')) {
+    //	document.write('<scr'+'ipt type="text/javascript">');
+    //	document.write('enableWikiaWriter();');
+    //	document.write('</scr'+'ipt>');
+    //	document.write('<scr'+'ipt type="text/javascript">');
+    //	document.write('var base_url = "http://wikia-ads.wikia.com/www/delivery/ajs.php";');
+    //	document.write('base_url += "?loc=" + escape(window.location);');
+    //	document.write('if(typeof document.referrer != "undefined") base_url += "&referer=" + escape(document.referrer);');
+    //	document.write('if(typeof document.context != "undefined") base_url += "&context=" + escape(document.context);');
+    //	document.write('if(typeof document.mmm_fo != "undefined") base_url += "&mmm_fo=1";');
+    //	document.write('base_url += "&zoneid=518";');
+    //	document.write('base_url += "&cb=" + Math.floor(Math.random()*99999999999);');
+    //	document.write('if(typeof document.MAX_used != "undefined" && document.MAX_used != ",") base_url += "&exclude=" + document.MAX_used;');
+    //	document.write('</scr'+'ipt>');
+    //	document.write('<scr'+'ipt type="text/javascript" src="'+base_url+'"></scr'+'ipt>');
+    //}
+    //]]>-->
+    </script>
+    <script type="text/javascript">
+    <!--//<![CDATA[
+    //if(document.getElementById('adSpace1')) {
+    //	document.write('<scr'+'ipt type="text/javascript">flushWikiaWriter(1);</scr'+'ipt>');
+    //}
+    //]]>-->
+    </script>
+    
+    
+    
+    
+  </body>
+</html>

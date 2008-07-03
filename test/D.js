@@ -1,2 +1,4 @@
-function D () {return true};
-B != null;
+function D() {};
+new A();
+new B();
+new C();

@@ -1,2 +1,3 @@
-function I () {return true};
-F != null;
+function I() {};
+new F();
+new A();

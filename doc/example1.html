@@ -1,0 +1,76 @@
+<html>
+  <head>
+    <title>JSLoad Test Page</title>
+    <link rel="stylesheet" type="text/css" href="../shared/style.css">
+    <script src="../jsload.js"></script>  
+
+    <script type="text/Javascript">
+      // Model dependencies
+      var tags = [
+        { name : "prototype" }
+      ];    
+      var jsLoader = new JSLoad(tags, "./"); 
+    </script>
+    
+  </head>
+  <body>
+    <div class="title">
+      <img src="../shared/icon.png" align="top" />JSLoad
+    </div>
+    <div id="content">
+      <h1>
+        <a href="index.html">Doc</a> :
+        Examples
+      </h1>      
+      <h2>Example 1: Lazy Loading</h2>
+      
+      <p>
+        The gray box below is populated by script, but that script depends
+        on prototype.js to work. JSLoad works lazily, though, only loading
+        things when it needs them.
+      </p>
+      
+      <p>  
+        While loading, the box is populated with a simple test that
+        confirms that prototype.js is not, 
+        in fact, loaded. Once you click "Run Test," however, JSLoad will find
+        that it needs prototype.js to load the script. It will then load
+        prototype.js and execute the script as a callback.
+      </p>
+      
+      <div id="output" class="graybox"></div>
+    
+      <script type="text/javascript" charset="utf-8">
+      
+        document.getElementById("output").innerHTML =
+          "The Prototype object is currently: " + typeof Prototype;
+        
+        function runTest() {
+          jsLoader.load( ["prototype"], function() {
+            $("output").innerHTML = "Prototype loaded and this box populated on callback.";
+          });          
+        }        
+      </script>
+    
+      <input type="button" onclick="runTest()" value="Run Test" />
+    
+      <p class="footer">
+      &copy; 2007-2008 Instructables | Licenses:
+        <a href="http://opensource.org/licenses/lgpl-2.1.php" rel="license">LGPL (source code)</a> 
+        and 
+        <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="license">
+          <abbr title="Creative Commons Attribution-Share Alike 3.0 License">CC BY-SA</abbr> (documentation)
+        </a>.
+      </p>
+      
+    </div>
+    
+    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+    _uacct = "UA-587715-2";
+    urchinTracker();
+    </script>
+    
+  </body>
+</html>

@@ -1,0 +1,259 @@
+<html>
+  <head>
+      <title>JSLoad Test Page</title>
+      <link rel="stylesheet" type="text/css" href="../shared/style.css">
+    </head>
+    <body>
+      <div class="title">
+        <img src="../shared/icon.png" align="top" />JSLoad
+      </div>
+      <div id="content"><h1>
+        <a href="../doc/index.html">Doc</a> :
+        Test Page
+      </h1>
+        <h2>Test dependency structures:</h2>
+      <p>
+        In the diagram below, children in the tree depend on their parents. 
+        C is marked (loaded), meaning that it has already been loaded by an 
+        outside library. The (tag) marker denotes a tag. G is a tag, for 
+        example, so it depends on source file A, but is not a source file 
+        itself.
+      </p>
+      <pre>
+        A                   A
+        |                   |___
+        |                   |   |
+        B   C(loaded)       F   G(tag)
+        |___|               |___|
+        |                   |       
+        D                   H(tag)   
+                            |       
+                            |              
+                            I                       
+      </pre>
+
+      <h2>Tests:</h2>
+      <div class="graybox">
+        <ol style="margin-left:-11px;">
+          <li>
+            These are example tests:
+            <ul>
+              <li id="test0a">Passing tests will look like this.</li>
+              <li id="test0b">Failing tests will look like this.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+      <ol>
+        <li>
+          Test <pre>getSrcToLoad(["X"])</pre> for all tags:
+          <ul>
+            <li id="test1a">Test A.</li>
+            <li id="test1b">Test B.</li>
+            <li id="test1c">Test C.</li>
+            <li id="test1d">Test D.</li>
+            <li id="test1f">Test F.</li>
+            <li id="test1g">Test G(tag).</li>
+            <li id="test1h">Test H(tag).</li>    
+            <li id="test1i">Test I.</li>     
+          </ul>
+        </li>
+        <li>
+          Test actual load of H using a callback:
+          <ul>
+            <li id="test2a">A is loaded.</li>        
+            <li id="test2b">F is loaded.</li>    
+            <li id="test2c">Scripts loaded with appended version parameter.</li> 
+            <li id="test2d">Callback is only called once for the set.</li>                
+          </ul>
+        </li>
+        <li>
+          With H already loaded, make sure that loaded libs are kept track 
+          of and not re-loaded:
+          <ul>
+            <li id="test3a">
+              Test D, using <pre>getSrcToLoad()</pre>. A should not be loaded.
+            </li>
+            <li id="test3b">
+              Test actual load of D within ajax update.
+            </li>  
+            <li id="test3c">
+              Reload of D doesn't load anything, but callback is still fired.
+            </li>          
+          </ul>
+        </li> 
+        <li>
+          Race condition and queue testing:
+          <ul>
+            <li id="test4a">
+              If I is loaded twice in a row, the first load will not have
+              completed before the second one is attempted.
+            </li>
+            <li id="test4b">
+              However, the second attempt (modeled with a 
+              <pre>getSrcToLoad()</pre>) will not actually do the load.
+            </li>    
+            <li id="test4c">
+              When I attempts loading, F should not have finished loading, yet.
+            </li>  
+            <li id="test4d">
+              By the time I is loaded, F should have finished loading.
+            </li>                        
+          </ul>
+        </li>
+      </ol>
+    
+      <h2>Ajax-updated div:</h2>
+      <div id="ajax-updated" class="graybox"></div>
+    
+      <p class="footer">
+      &copy; 2007-2008 Instructables | Licenses:
+        <a href="http://opensource.org/licenses/lgpl-2.1.php" rel="license">LGPL (source code)</a> 
+        and 
+        <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="license">
+          <abbr title="Creative Commons Attribution-Share Alike 3.0 License">CC BY-SA</abbr> (documentation)
+        </a>.
+      </p>
+    
+      <script src="../jsload.js"></script>
+      <script src="../shared/prototype.js"></script>    
+      <script src="C.js"></script>
+    
+      <script type="text/Javascript">
+    
+        // Model dependencies
+        var tags = [
+          { name : "A"
+          },
+          { name : "B",
+            requires : ["A"]
+          },
+          { name : "C",
+            isLoaded : function () {return typeof C != "undefined"}
+          },
+          { name : "D",
+            requires : ["B", "C"]
+          },
+          { name : "F",
+            requires : ["A"]
+          },
+          { name : "G",
+            requires : ["A"],
+            tagOnly : true
+          },
+          { name : "H",
+            requires : ["F", "G"],
+            tagOnly : true
+          },
+          { name : "I",
+            requires : ["H"]
+          }        
+        ];
+      
+        var jsLoader = new JSLoad(tags, "./", "foo");
+ 
+        // Functions for testing.
+        function compare(ary1, ary2) {
+          for (var i = 0; i < ary1.length; i++) {
+            if (ary1[i] != ary2[i]) return false;
+          }
+          return ary1.length == ary2.length;
+        }
+      
+        function test(testName, test) {           
+          var el = document.getElementById(testName);
+          el.className = test ? "passed" : "failed";
+        }
+      
+        // Default all tests to failed
+        $$("li li").each(function(el) { el.addClassName("failed") });
+
+        // Tests, section 0
+        test("test0a", compare([true], [true]));
+        test("test0b", compare([true], [false]));
+                
+        // Tests, section 1
+        test("test1a", 
+          compare(
+            jsLoader.getSrcToLoad(["A"]), 
+            ["./A.js"]));
+        test("test1b", 
+          compare(
+            jsLoader.getSrcToLoad(["B"]), 
+            ["./A.js", "./B.js"]));
+        test("test1c",
+          compare(
+            jsLoader.getSrcToLoad(["C"]), 
+            []));
+        test("test1d", 
+          compare(
+            jsLoader.getSrcToLoad(["D"]), 
+            ["./A.js", "./B.js", "./D.js"]));
+        test("test1f", 
+          compare(
+            jsLoader.getSrcToLoad(["F"]), 
+            ["./A.js", "./F.js"]));
+        test("test1g", 
+          compare(
+            jsLoader.getSrcToLoad(["G"]), 
+            ["./A.js"]));
+        test("test1h", 
+          compare(
+            jsLoader.getSrcToLoad(["H"]), 
+            ["./A.js", "./F.js"]));
+        test("test1i", 
+          compare(
+            jsLoader.getSrcToLoad(["I"]), 
+            ["./A.js", "./F.js", "./I.js"]));          
+          
+        // Tests, section 2
+        var test2CallbackExecuted = false;
+        jsLoader.load(["H"], function () {
+          test("test2a", typeof A != "undefined");    
+          test("test2b", typeof F != "undefined");     
+          test("test2c", function(){
+            var head = document.getElementsByTagName("head")[0];
+            var scripts = head.getElementsByTagName("script"); 
+            return scripts[0].src.slice(-11) == "version=foo";
+          }());
+          test("test2d", !test2CallbackExecuted);
+          test2CallbackExecuted = true;
+        });
+   
+        // Test 3
+        test("test3a", 
+          compare(
+            jsLoader.getSrcToLoad(["D"]), 
+            ["./B.js", "./D.js"]));          
+      
+        // tests 3b and 3c are within ajax.html
+        new Ajax.Updater("ajax-updated", "ajax.html", {
+          evalScripts: true,
+          method: "get"
+        });
+
+        // Test 4
+        var loadIcompleted = false;      
+        jsLoader.load(["I"], function() {
+          test("test4d", typeof F != "undefined");
+          loadIcompleted = true;
+        });
+        test("test4b", 
+          compare(
+            jsLoader.getSrcToLoad(["I"]), 
+            []));
+        test("test4a", !loadIcompleted);
+        test("test4c", typeof F == "undefined");
+ 
+      </script>
+    </div>
+    
+    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+    _uacct = "UA-587715-2";
+    urchinTracker();
+    </script>
+    
+  </body>
+</html>

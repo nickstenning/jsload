@@ -1,0 +1,96 @@
+body {
+  font-family: "Lucida Grande", sans-serif;
+  font-size: 10pt;
+  color: #333;
+}
+
+a {
+  color: #008000;
+}
+
+#content {
+  margin-left: 30px;
+  width: 500px;
+}
+
+.title {
+  font-size: 300%;
+  font-weight: bold;
+  color: #008800;
+}
+
+pre {
+  display: inline;
+  color: #339;
+}
+
+ul li {
+  color:#ccc;
+  padding: 2px 5px;
+}
+
+ul li.passed {
+  padding: 2px 5px;
+  color: #090;
+  background-color: transparent;
+}
+
+ul li.failed {
+  padding: 2px 5px;
+  color:#fff;
+  background-color: #f00;
+}
+
+.graybox {
+  background-color: #eee;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+input {
+  border: 2px solid #003300;
+  border-top: 2px solid #00aa00;
+  border-left: 2px solid #00aa00;
+  background-color: #008000;
+  color: #fff;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.footer {
+  border-top: 1px solid #eee;
+  padding-top: 5px;
+  margin-top: 20px;
+  color: #aaa;
+  font-size: 80%;
+}
+
+.footer a {
+  color: #aca;
+}
+
+.hidden {
+  display: none;
+}
+
+.shown {
+  display: inherit;
+}
+
+
+/* Flickr Badge Styles */
+#flickr_badge_uber_wrapper {width:100%;}
+#flickr_badge_uber_wrapper h3 { margin: 0px;}
+#flickr_badge_wrapper {padding:10px 0 10px 0;}
+.flickr_badge_image {margin:0 5px 5px 0px; float: left;}
+.flickr_badge_image img {border: 1px solid #999 !important;}
+#flickr_badge_source {text-align:left;}
+#flickr_badge_icon {float:left; margin-right:5px;}
+#flickr_www {display:block; padding:0 10px 0 10px !important; font: 11px Arial, Helvetica, Sans serif !important; color:#3993ff !important;}
+#flickr_badge_uber_wrapper a:hover,
+#flickr_badge_uber_wrapper a:link,
+#flickr_badge_uber_wrapper a:active,
+#flickr_badge_uber_wrapper a:visited {text-decoration:none !important; background:inherit !important;color:#3993ff;}
+#flickr_badge_wrapper {}
+#flickr_badge_source {padding:0 !important; font: 11px Arial, Helvetica, Sans serif !important; color:#666666 !important;}

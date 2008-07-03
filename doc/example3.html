@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <title>JSLoad Examples: Example 3</title>
+    <link rel="stylesheet" type="text/css" href="../shared/style.css">
+    <script src="../jsload.js"></script>  
+
+    <script type="text/Javascript">
+      // Model dependencies
+      var tags = [
+        { name : "prototype" },
+        { name : "Base",
+          requires : ["prototype"]
+        },
+        { name : "cvi_busy_lib" },
+        { name : "timer",
+          requires : ["prototype", "cvi_busy_lib"],
+          tagOnly: true
+        },
+        { name : "blink",
+          requires : ["Base"],
+        },
+        { name : "flasher",
+          requires : ["blink"],
+          tagOnly: true
+        }        
+      ];    
+      var jsLoader = new JSLoad(tags, "./"); 
+    </script>
+    
+  </head>
+  <body>
+    <div class="title">
+      <img src="../shared/icon.png" align="top" />JSLoad
+    </div>
+    <div id="content">
+      <h1>        
+        <a href="index.html">Doc</a> : 
+        Examples
+      </h1>
+      
+      <h2>Example 3: Duplicating Widgets and Refactoring</h2>
+      
+      <p>
+        This example includes the same dependencies as in 
+        <a href="example2.html">Example 2</a>.
+      </p>
+    
+      <div id="output" class="graybox">Run stuff!</div>
+    
+      <script type="text/javascript" charset="utf-8">
+        function log(text) {
+          var logger = document.getElementById("logger");
+          logger.style.display = "inherit";
+          logger.innerHTML += text + "<br/>"
+        }
+      
+        function runTimer() {
+          var filesThatWillBeLoaded = jsLoader.getSrcToLoad(["timer"]);
+          log( "Files that will be loaded: " 
+            + (filesThatWillBeLoaded.length > 0 ? filesThatWillBeLoaded.join(", ") : "none") );
+          jsLoader.load( ["timer"], function() {
+            $("output").innerHTML = "Show timer for a sec.";
+            var ctrl = getBusyOverlay(
+              $('output'),
+              {color:'green', opacity:0.25}, {type:'oval'}
+            );
+            setTimeout( function () { 
+              ctrl.remove(); 
+              $("output").innerHTML = "Timer complete";
+            }, 1000);
+          });          
+        }
+        
+        function runFlasher() {
+          var filesThatWillBeLoaded = jsLoader.getSrcToLoad(["flasher"]);
+          log( "Files that will be loaded: " 
+            + (filesThatWillBeLoaded.length > 0 ? filesThatWillBeLoaded.join(", ") : "none") );
+          jsLoader.load( ["flasher"], function() {
+            $("output").innerHTML = "Flashing!";
+            new RedBlinker( {"element":$("output")} ).blink();
+          });          
+        }
+      </script>
+      
+      <input type="button" onclick="runTimer()" value="Run Timer" />
+      <input type="button" onclick="runFlasher()" value="Run Flasher" />
+    
+      <div id="logger" class="graybox hidden"></div>
+    
+      <p class="footer">
+      &copy; 2007-2008 Instructables | Licenses:
+        <a href="http://opensource.org/licenses/lgpl-2.1.php" rel="license">LGPL (source code)</a> 
+        and 
+        <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="license">
+          <abbr title="Creative Commons Attribution-Share Alike 3.0 License">CC BY-SA</abbr> (documentation)
+        </a>.
+      </p>
+      
+    </div>
+    
+    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+    _uacct = "UA-587715-2";
+    urchinTracker();
+    </script>
+    
+  </body>
+</html>

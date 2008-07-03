@@ -1,2 +1,2 @@
-function F () {return true};
-A != null;
+function F() {};
+new A();
