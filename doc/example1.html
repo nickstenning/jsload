@@ -47,7 +47,12 @@
         
         function runTest() {
           jsLoader.load( ["prototype"], function() {
-            $("output").innerHTML = "Prototype loaded and this box populated on callback.";
+            $("output").innerHTML = "Prototype loaded! "
+              + "This box was populated on callback. "
+              + "Let's test by checking your browser with the contents "
+              + "of Prototype.Browser:<blockquote>"
+              + Object.toJSON(Prototype.Browser)
+              + "</blockquote>";
           });          
         }        
       </script>
