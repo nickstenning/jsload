@@ -133,6 +133,8 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
         (tag.isLoaded && tag.isLoaded())) continue;
     if ( tagName.indexOf("http://") > -1 ) {
       var filePath = tagName;
+    } else if (tag.path) {
+      var filePath = tag.path + tagName + '.js';
     } else {
       var filePath = (path ? path : "") + tagName + '.js';
     }
