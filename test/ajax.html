@@ -1,0 +1,17 @@
+These contents came from an AJAX Query. The scripts in this HTML snippet will be executed in the context of Prototype's evalScripts().
+
+<script>
+  jsLoader.load(["D"], function () {
+    test("test3b", typeof D != "undefined");
+    var srcOnDReload = jsLoader.getSrcToLoad(["D"]);
+    var dReloadCallbackFired = false;
+    jsLoader.load(["D"], function () {
+      dReloadCallbackFired = true;
+    });
+    
+    // invalidate test3c if the callback never gets called
+    setTimeout(function() {
+      test("test3c",  compare(srcOnDReload, []) && dReloadCallbackFired);
+    }, 500);
+  });  
+</script>
