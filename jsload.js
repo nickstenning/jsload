@@ -24,16 +24,6 @@
  */
  
 /*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, nomen: true, plusplus: true, regexp: true, undef: true */
- 
-Array.prototype.clean = function (deleteValue) {
-  for (var i = 0; i < this.length; i += 1) {
-    if (this[i] === deleteValue) {         
-      this.splice(i, 1);
-      i -= 1;
-    }
-  }
-  return this;
-};
 
 function JSLoad(tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
   // convert the tags array into a hash and keep a separate tagOrder array.
