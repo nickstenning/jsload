@@ -230,7 +230,10 @@ JSLoad.prototype.loadScript = function (srcSetObj, iteration) {
     } else {
       // If we've hit the end of this srcSet, run loadNext()
       iteration = iteration || 0;
-      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) { loadNext(); }
+      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) { 
+        loadNext();
+        return;
+      }
       
       // Mark this file as loaded
       url = srcSetObj.srcToLoad[iteration];
