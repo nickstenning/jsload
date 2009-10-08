@@ -23,12 +23,12 @@
  * @url      http://www.instructables.com
  */
 
-function JSLoad(tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
+function JSLoad (tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
   // convert the tags array into a hash and keep a separate tagOrder array.
-  if (!tags) return;
+  if (!tags) { return; }
   var objectHash = {};
   var ordering = [];
-  for (var i = 0; i < tags.length; i++) {
+  for (var i = 0; i < tags.length; i += 1) {
     var tag = tags[i];
     objectHash[tag.name] = tag;
     ordering.push(tag.name);
@@ -54,11 +54,11 @@ function JSLoad(tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
   this.ALLJS = true; // a constant
 }
 
-JSLoad.prototype.load = function(tagNames, callback, path, version, executeAfterLoad) {
-  if (!tagNames) return; // tagNames required
-  var path = path || this.path;
-  var version = version || this.version;  
-  var executeAfterLoad = executeAfterLoad || this.executeAfterLoad;
+JSLoad.prototype.load = function (tagNames, callback, path, version, executeAfterLoad) {
+  if (!tagNames) { return; } // tagNames required
+  path = path || this.path;
+  version = version || this.version;  
+  executeAfterLoad = executeAfterLoad || this.executeAfterLoad;
 
   // Keep track of all the source files that we are about to load
   // This allows us to skip repeat calls to load a file, if it is pending.
@@ -87,10 +87,10 @@ JSLoad.prototype.load = function(tagNames, callback, path, version, executeAfter
       this.loadScript(this.sourceFileSetQueue[0]);
     }
   }
-}
+};
 
 JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
-  if (!path) var path = this.path;
+  if (!path) { path = this.path; }
 
   // for closures in markDependentTags()
   var tags = this.tags;
@@ -99,10 +99,10 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
   // private function, to be called recursively
   function markDependentTags(tagName) {
     var tag = tags[tagName];
-    if (!tag) return;    
+    if (!tag) { return; }
     dependentTags[tagName] = true;      
-    if (!tag.requires) return;
-    for (var i = 0; i < tag.requires.length; i++) {
+    if (!tag.requires) { return; }
+    for (var i = 0; i < tag.requires.length; i += 1) {
       var requiredTagName = tag.requires[i];
       // only load if not already loaded
       if (!dependentTags[requiredTagName]) { 
@@ -112,7 +112,7 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
   }
 
   // create the full set of dependent tags
-  for (var i = 0; i < tagNames.length; i++) {
+  for (var i = 0; i < tagNames.length; i += 1) {
     markDependentTags(tagNames[i]);
   }
 
@@ -124,37 +124,44 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
   //  - the tag's source file has already been loaded
   //  - the tag's source file is in the queue for loading
   var srcToLoad = [];
-  for (var i = 0; i < this.tagOrder.length; i++) {
-    var tagName = this.tagOrder[i];
+  for (var j = 0; j < this.tagOrder.length; j += 1) {
+    var tagName = this.tagOrder[j];
     var tag = this.tags[tagName];
-
+    
     if (tag.tagOnly ||
         !dependentTags[tagName] ||
-        (tag.isLoaded && tag.isLoaded())) continue;
-    if ( tagName.indexOf("http://") > -1 ) {
-      var filePath = tagName;
-    } else if (tag.path) {
-      var filePath = tag.path + tagName + '.js';
-    } else {
-      var filePath = (path ? path : "") + tagName + '.js';
+        (tag.isLoaded && tag.isLoaded())) { 
+      continue; 
     }
-    if (this.sourceFilesLoaded[filePath] || this.isQueued(filePath)) continue;
+    
+    var filePath;
+    
+    if (tagName.indexOf("http://") > -1) {
+      filePath = tagName;
+    } else if (tag.path) {
+      filePath = tag.path + tagName + '.js';
+    } else {
+      filePath = (path ? path : "") + tagName + '.js';
+    }
+    if (this.sourceFilesLoaded[filePath] || this.isQueued(filePath)) { 
+      continue; 
+    }
 
     srcToLoad.push(filePath);
   }
   
   return srcToLoad;
-}
+};
 
-JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
+JSLoad.prototype.loadScript = function (srcSetObj, iteration) {
   this.sourceFileSetQueue.isRunning = true;
   var thisObj = this; // for closures
   var thisFn = arguments.callee;
 
   // This fires the callback when a srcSet is finished loading. First, it
   // executes the callback.
-  function loadNext () {
-    if (srcSetObj.callback) srcSetObj.callback();
+  function loadNext() {
+    if (srcSetObj.callback) { srcSetObj.callback(); }
     thisObj.sourceFileSetQueue.shift();
     if (thisObj.sourceFileSetQueue.length > 0) {
       thisFn.call(thisObj, thisObj.sourceFileSetQueue[0]);
@@ -164,15 +171,15 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
   }
 
   // Creates script el, adds onload handlers, and inserts into the dom.
-  function createScriptEl (url, srcSetObj, iteration) {
+  function createScriptEl(url, srcSetObj, iteration) {
     // Create script, set properties, load
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.src = url;
     // script onload, handling Safari 2.0
     function scriptOnLoad() { 
-      if (script.readyState && script.readyState != "loaded" && 
-          script.readyState != "complete") { return; }
+      if (script.readyState && script.readyState !== "loaded" && 
+          script.readyState !== "complete") { return; }
       script.onreadystatechange = script.onload = null;
       // next iteration
       if (thisObj.scriptConcatenatorURL) {
@@ -180,7 +187,7 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
       } else {
         thisObj.loadScript(srcSetObj, iteration);
       }
-    };
+    }
     if (thisObj.safariSetsLoaded) { // Safari hack
       var callbackTimer = setInterval(function() {
         if (thisObj.safariSetsLoaded[srcSetObj.srcToLoad.join(",")]) {
@@ -196,24 +203,25 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
 
   // If there are no source files in this set, just execute the callback and
   // move on.
-  if (srcSetObj.srcToLoad.length == 0) {
+  if (srcSetObj.srcToLoad.length === 0) {
     loadNext();
     
   // If there are source files, run them and set the callbacks to run when
   // the source files finish.
   } else {
+    var url;
     // If we're using a script concatenator on the server, then we load
     // all the scripts in one fell swoop.
     if (this.scriptConcatenatorURL) {
       // Mark all files as loaded
-      for (var i = 0; i < srcSetObj.srcToLoad.length; i++) {
-        var url = srcSetObj.srcToLoad[i];
+      for (var i = 0; i < srcSetObj.srcToLoad.length; i += 1) {
+        url = srcSetObj.srcToLoad[i];
         this.sourceFilesLoaded[url] = true;
       }     
       createScriptEl( 
-        this.scriptConcatenatorURL
-          + srcSetObj.srcToLoad.join(",")
-          + (srcSetObj.version ? "&version=" + srcSetObj.version : ""),
+        this.scriptConcatenatorURL +
+          srcSetObj.srcToLoad.join(",") +
+          (srcSetObj.version ? "&version=" + srcSetObj.version : ""),
         srcSetObj
       );
     
@@ -222,10 +230,10 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
     } else {
       // If we've hit the end of this srcSet, run loadNext()
       iteration = iteration || 0;
-      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) loadNext();
+      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) { loadNext(); }
       
       // Mark this file as loaded
-      var url = srcSetObj.srcToLoad[iteration];
+      url = srcSetObj.srcToLoad[iteration];
       this.sourceFilesLoaded[url] = true;
       createScriptEl( 
         url + (srcSetObj.version ? "?version=" + srcSetObj.version : ""),
@@ -234,14 +242,14 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
       );
     }
   }
-}  
+}; 
 
 JSLoad.prototype.isQueued = function(url) {
-  for (var i = 0; i < this.sourceFileSetQueue.length; i++) {
+  for (var i = 0; i < this.sourceFileSetQueue.length; i += 1) {
     var set = this.sourceFileSetQueue[i];
-    for (var j = 0; j < set.srcToLoad.length; j++) {
-      if (url == set.srcToLoad[j]) return true;
+    for (var j = 0; j < set.srcToLoad.length; j += 1) {
+      if (url === set.srcToLoad[j]) { return true; }
     }
   }
   return false;
-}
+};
