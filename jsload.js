@@ -166,22 +166,22 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
   // Creates script el, adds onload handlers, and inserts into the dom.
   function createScriptEl (url, srcSetObj, iteration) {
     // Create script, set properties, load
-	  var script = document.createElement("script");
-  	script.type = "text/javascript";
-  	script.src = url;
-	  // script onload, handling Safari 2.0
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url;
+    // script onload, handling Safari 2.0
     function scriptOnLoad() { 
-  		if (script.readyState && script.readyState != "loaded" && 
-  		    script.readyState != "complete") { return; }
-  		script.onreadystatechange = script.onload = null;
+      if (script.readyState && script.readyState != "loaded" && 
+          script.readyState != "complete") { return; }
+      script.onreadystatechange = script.onload = null;
       // next iteration
       if (thisObj.scriptConcatenatorURL) {
         loadNext();
       } else {
         thisObj.loadScript(srcSetObj, iteration);
       }
-  	};
-  	if (thisObj.safariSetsLoaded) { // Safari hack
+    };
+    if (thisObj.safariSetsLoaded) { // Safari hack
       var callbackTimer = setInterval(function() {
         if (thisObj.safariSetsLoaded[srcSetObj.srcToLoad.join(",")]) {
           clearInterval(callbackTimer);
@@ -191,49 +191,49 @@ JSLoad.prototype.loadScript = function(srcSetObj, iteration) {
     } else {
       script.onload = script.onreadystatechange = scriptOnLoad;
     }
-	  document.getElementsByTagName("head")[0].appendChild(script);
+    document.getElementsByTagName("head")[0].appendChild(script);
   }
 
-	// If there are no source files in this set, just execute the callback and
-	// move on.
-	if (srcSetObj.srcToLoad.length == 0) {
-	  loadNext();
-	  
-	// If there are source files, run them and set the callbacks to run when
-	// the source files finish.
-	} else {
-  	// If we're using a script concatenator on the server, then we load
-  	// all the scripts in one fell swoop.
-  	if (this.scriptConcatenatorURL) {
-  	  // Mark all files as loaded
-    	for (var i = 0; i < srcSetObj.srcToLoad.length; i++) {
-    	  var url = srcSetObj.srcToLoad[i];
-      	this.sourceFilesLoaded[url] = true;
-    	}  	  
+  // If there are no source files in this set, just execute the callback and
+  // move on.
+  if (srcSetObj.srcToLoad.length == 0) {
+    loadNext();
+    
+  // If there are source files, run them and set the callbacks to run when
+  // the source files finish.
+  } else {
+    // If we're using a script concatenator on the server, then we load
+    // all the scripts in one fell swoop.
+    if (this.scriptConcatenatorURL) {
+      // Mark all files as loaded
+      for (var i = 0; i < srcSetObj.srcToLoad.length; i++) {
+        var url = srcSetObj.srcToLoad[i];
+        this.sourceFilesLoaded[url] = true;
+      }     
       createScriptEl( 
         this.scriptConcatenatorURL
           + srcSetObj.srcToLoad.join(",")
-      	  + (srcSetObj.version ? "&version=" + srcSetObj.version : ""),
-      	srcSetObj
+          + (srcSetObj.version ? "&version=" + srcSetObj.version : ""),
+        srcSetObj
       );
     
     // If we're not using a script concatenator, then this function will
     // recurse through the each of the scripts in this srcSet.
-  	} else {
-  	  // If we've hit the end of this srcSet, run loadNext()
-  	  iteration = iteration || 0;
-  	  if ( (iteration + 1) > srcSetObj.srcToLoad.length ) loadNext();
-  	  
-  	  // Mark this file as loaded
-  	  var url = srcSetObj.srcToLoad[iteration];
-  	  this.sourceFilesLoaded[url] = true;
-  	  createScriptEl( 
-  	    url + (srcSetObj.version ? "?version=" + srcSetObj.version : ""),
-  	    srcSetObj,
-  	    iteration + 1
-  	  );
-  	}
-	}
+    } else {
+      // If we've hit the end of this srcSet, run loadNext()
+      iteration = iteration || 0;
+      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) loadNext();
+      
+      // Mark this file as loaded
+      var url = srcSetObj.srcToLoad[iteration];
+      this.sourceFilesLoaded[url] = true;
+      createScriptEl( 
+        url + (srcSetObj.version ? "?version=" + srcSetObj.version : ""),
+        srcSetObj,
+        iteration + 1
+      );
+    }
+  }
 }  
 
 JSLoad.prototype.isQueued = function(url) {
