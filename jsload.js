@@ -22,10 +22,8 @@
  * @version  0.9
  * @url      http://www.instructables.com
  */
- 
-/*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, nomen: true, plusplus: true, regexp: true, undef: true */
 
-function JSLoad(tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
+function JSLoad (tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
   // convert the tags array into a hash and keep a separate tagOrder array.
   if (!tags) { return; }
   var objectHash = {};
@@ -57,7 +55,7 @@ function JSLoad(tags, path, version, executeAfterLoad, scriptConcatenatorURL) {
 }
 
 JSLoad.prototype.load = function (tagNames, callback, path, version, executeAfterLoad) {
-  if (!tagNames) { return; }// tagNames required
+  if (!tagNames) { return; } // tagNames required
   path = path || this.path;
   version = version || this.version;  
   executeAfterLoad = executeAfterLoad || this.executeAfterLoad;
@@ -76,19 +74,52 @@ JSLoad.prototype.load = function (tagNames, callback, path, version, executeAfte
   // has loaded.
   if (!this.sourceFileSetQueue.isRunning) {
     if (executeAfterLoad) {
-      var thisObj = this;
-      
-      // FIXME: explicit requirement for jQuery.
-      $(document).ready(function () {
-        thisObj.loadScript(thisObj.sourceFileSetQueue[0]);
-      });
-      // Don't have any more loadScript calls set. The first call after the 
-      // page load will open this back up.
-      this.sourceFileSetQueue.isRunning = true; 
+      this.scheduleAfterLoadExecution();
     } else {
       this.loadScript(this.sourceFileSetQueue[0]);
     }
   }
+};
+
+/*
+ * scheduleAfterLoadExecution()
+ *
+ * If executeAfterLoad behavior is desired, JSLoad will look for common
+ * libraries to wait for as short a time as possible. With JQuery, Prototype,
+ * of ContentLoaded available, JSLoad will wait only until the DOM is ready
+ * to start executing its queued actions. It is recommended that one of these
+ * libraries be loaded before JSLoad if executeAfterLoad behavior is desired.
+ * Another option is to override this method with an implementation of your
+ * choice.
+ * 
+ * If none of those are available, then JSLoad will simply use the 
+ * window.onload event, which will delay execution until all of the page's 
+ * resources have downloaded. It will also modify the window's onload property 
+ * directly, potentially conflicting with any other code that assumes access 
+ * to that window.onload.
+ */
+JSLoad.prototype.scheduleAfterLoadExecution = function() {
+  var thisObj = this;      
+  if (typeof Prototype === "object") {
+    $(document).observe('dom:loaded', function() {
+      thisObj.loadScript(thisObj.sourceFileSetQueue[0]);
+    });
+  } else if (typeof jQuery === "function") {
+    $(document).ready(function () {
+      thisObj.loadScript(thisObj.sourceFileSetQueue[0]);
+    });
+  } else if (typeof ContentLoaded === "function") {
+    ContentLoaded(window, function () {
+      thisObj.loadScript(thisObj.sourceFileSetQueue[0]);
+    });
+  } else {
+    window.onload = function () {
+      thisObj.loadScript(thisObj.sourceFileSetQueue[0]);
+    }
+  }
+  // Don't have any more loadScript calls set. The first call after the 
+  // page load will open this back up.
+  this.sourceFileSetQueue.isRunning = true;
 };
 
 JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
@@ -129,11 +160,11 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
   for (var j = 0; j < this.tagOrder.length; j += 1) {
     var tagName = this.tagOrder[j];
     var tag = this.tags[tagName];
-
+    
     if (tag.tagOnly ||
         !dependentTags[tagName] ||
-        (tag.isLoaded && tag.isLoaded())) {
-      continue;
+        (tag.isLoaded && tag.isLoaded())) { 
+      continue; 
     }
     
     var filePath;
@@ -145,10 +176,10 @@ JSLoad.prototype.getSrcToLoad = function(tagNames, path) {
     } else {
       filePath = (path ? path : "") + tagName + '.js';
     }
-    if (this.sourceFilesLoaded[filePath] || this.isQueued(filePath)) {
-      continue;
+    if (this.sourceFilesLoaded[filePath] || this.isQueued(filePath)) { 
+      continue; 
     }
-    
+
     srcToLoad.push(filePath);
   }
   
@@ -224,29 +255,30 @@ JSLoad.prototype.loadScript = function (srcSetObj, iteration) {
         this.scriptConcatenatorURL +
           srcSetObj.srcToLoad.join(",") +
           (srcSetObj.version ? "&version=" + srcSetObj.version : ""),
-        srcSetObj);
+        srcSetObj
+      );
     
     // If we're not using a script concatenator, then this function will
     // recurse through the each of the scripts in this srcSet.
     } else {
       // If we've hit the end of this srcSet, run loadNext()
       iteration = iteration || 0;
-      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) { 
-        loadNext(); 
-        return; // fixes [issue:1] http://bit.ly/zI9aI
+      if ( (iteration + 1) > srcSetObj.srcToLoad.length ) {
+        loadNext();
+        return;
       }
       
       // Mark this file as loaded
       url = srcSetObj.srcToLoad[iteration];
       this.sourceFilesLoaded[url] = true;
-
       createScriptEl( 
         url + (srcSetObj.version ? "?version=" + srcSetObj.version : ""),
         srcSetObj,
-        iteration + 1);
+        iteration + 1
+      );
     }
   }
-};
+}; 
 
 JSLoad.prototype.isQueued = function(url) {
   for (var i = 0; i < this.sourceFileSetQueue.length; i += 1) {

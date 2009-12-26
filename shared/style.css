@@ -78,19 +78,9 @@ input {
   display: inherit;
 }
 
-
-/* Flickr Badge Styles */
-#flickr_badge_uber_wrapper {width:100%;}
-#flickr_badge_uber_wrapper h3 { margin: 0px;}
-#flickr_badge_wrapper {padding:10px 0 10px 0;}
-.flickr_badge_image {margin:0 5px 5px 0px; float: left;}
-.flickr_badge_image img {border: 1px solid #999 !important;}
-#flickr_badge_source {text-align:left;}
-#flickr_badge_icon {float:left; margin-right:5px;}
-#flickr_www {display:block; padding:0 10px 0 10px !important; font: 11px Arial, Helvetica, Sans serif !important; color:#3993ff !important;}
-#flickr_badge_uber_wrapper a:hover,
-#flickr_badge_uber_wrapper a:link,
-#flickr_badge_uber_wrapper a:active,
-#flickr_badge_uber_wrapper a:visited {text-decoration:none !important; background:inherit !important;color:#3993ff;}
-#flickr_badge_wrapper {}
-#flickr_badge_source {padding:0 !important; font: 11px Arial, Helvetica, Sans serif !important; color:#666666 !important;}
+.frametest {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  margin: 0 0 10px 0;
+}
